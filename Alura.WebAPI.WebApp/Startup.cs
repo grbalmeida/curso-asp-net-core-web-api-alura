@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Alura.WebAPI.WebApp.Formatters;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System;
 
 namespace Alura.ListaLeitura.WebApp
 {
@@ -44,9 +47,28 @@ namespace Alura.ListaLeitura.WebApp
 
             services.AddTransient<IRepository<Livro>, RepositorioBaseEF<Livro>>();
 
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.OutputFormatters.Add(new LivroCsvFormatter());
             }).AddXmlSerializerFormatters();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "JwtBearer";
+                options.DefaultChallengeScheme = "JwtBearer";
+            }).AddJwtBearer("JwtBearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("alura-webapi-authentication-valid")),
+                    ClockSkew = TimeSpan.FromMinutes(5),
+                    ValidIssuer = "Alura.WebApp",
+                    ValidAudience = "Talend"
+                };
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
