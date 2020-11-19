@@ -20,6 +20,7 @@ namespace Alura.WebAPI.WebApp.Api
         public IActionResult ListaDeLivros()
         {
             var lista = _repo.All.Select(l => l.ToModel()).ToList();
+            
             return Ok(lista);
         }
 
