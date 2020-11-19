@@ -1,15 +1,12 @@
-﻿using Alura.ListaLeitura.Persistencia;
 using Alura.ListaLeitura.Seguranca;
-using Alura.ListaLeitura.Modelos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Alura.WebAPI.WebApp.Formatters;
 
-namespace Alura.ListaLeitura.WebApp
+namespace Alura.WebAPI.AuthProvider
 {
     public class Startup
     {
@@ -22,10 +19,6 @@ namespace Alura.ListaLeitura.WebApp
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<LeituraContext>(options => {
-                options.UseSqlServer(Configuration.GetConnectionString("ListaLeitura"));
-            });
-
             services.AddDbContext<AuthDbContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("AuthDB"));
             });
@@ -38,16 +31,7 @@ namespace Alura.ListaLeitura.WebApp
                 options.Password.RequireLowercase = false;
             }).AddEntityFrameworkStores<AuthDbContext>();
 
-            services.ConfigureApplicationCookie(options => {
-                options.LoginPath = "/Usuario/Login";
-            });
-
-            services.AddTransient<IRepository<Livro>, RepositorioBaseEF<Livro>>();
-
-            services.AddMvc(options =>
-            {
-                options.OutputFormatters.Add(new LivroCsvFormatter());
-            }).AddXmlSerializerFormatters();
+            services.AddMvc();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -57,15 +41,7 @@ namespace Alura.ListaLeitura.WebApp
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseStaticFiles();
-            app.UseAuthentication();
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseMvc();
         }
     }
 }
